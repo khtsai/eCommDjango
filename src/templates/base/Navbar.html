@@ -1,0 +1,56 @@
+
+
+{% url 'home' as home_url %}
+{% url 'contact' as contact_url %}
+{% url 'login' as login_url %}
+{% url 'register' as register_url %}
+{% url 'about' as about_url %}
+{% url 'products:list' as products_url %}
+{% url 'carts:home' as carts_url %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class='container'>
+  <a class="navbar-brand" href="#">
+    <img src="https://v4-alpha.getbootstrap.com/assets/brand/bootstrap-solid.svg" width="30" height="30" alt=""> {% if brand_name %} {{ brand_name }} {% else %}eCommerce{% endif %}
+  </a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item {% if request.path == home_url %}active{% endif %}">
+        <a class="nav-link" href="{{ home_url }}">Home <span class="sr-only"></span></a>
+      </li>
+      <li class="nav-item {% if request.path == contact_url %}active{% endif %}">
+        <a class="nav-link" href="{{ contact_url }}">Contact <span class="sr-only"></span></a>
+      </li>    
+      <li class="nav-item {% if request.path == products_url %}active{% endif %}">
+        <a class="nav-link" href="{{ products_url }}">Products <span class="sr-only"></span></a>
+      </li> 
+      <li class="nav-item {% if request.path == carts_url %}active{% endif %}">
+        <a class="nav-link" href="{{ carts_url }}">{{ request.session.cart_items }}<i class="fas fa-shopping-cart"></i><span class="sr-only"></span></a>
+      </li>   
+      <li class="nav-item {% if request.path == about_url %}active{% endif %}">
+        <a class="nav-link" href="{{ about_url }}">About <span class="sr-only"></span></a>
+      </li>
+      {% if request.user.is_authenticated %}
+      	<li class="nav-item {% if request.path == login_url %}active{% endif %}">
+        	<a class="nav-link" href="{{ login_url }}">Logout <span class="sr-only"></span></a>
+      	</li>
+      {% else %}
+      	<li class="nav-item {% if request.path == login_url %}active{% endif %}">
+        	<a class="nav-link" href="{{ login_url }}">Login <span class="sr-only"></span></a>
+      	</li>
+      	<li class="nav-item {% if request.path == register_url %}active{% endif %}">
+        	<a class="nav-link" href="{{ register_url }}">Register <span class="sr-only"></span></a>
+      	</li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
+	{% include "search/snippets/search-form.html" %}
+  </div>
+  </div>
+</nav>
