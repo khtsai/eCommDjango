@@ -3,6 +3,7 @@
 {% url 'home' as home_url %}
 {% url 'contact' as contact_url %}
 {% url 'login' as login_url %}
+{% url 'logout' as logout_url %}
 {% url 'register' as register_url %}
 {% url 'about' as about_url %}
 {% url 'products:list' as products_url %}
@@ -35,8 +36,8 @@
         <a class="nav-link" href="{{ about_url }}">About <span class="sr-only"></span></a>
       </li>
       {% if request.user.is_authenticated %}
-      	<li class="nav-item {% if request.path == login_url %}active{% endif %}">
-        	<a class="nav-link" href="{{ login_url }}">Logout <span class="sr-only"></span></a>
+      	<li class="nav-item {% if request.path == logout_url %}active{% endif %}">
+        	<a class="nav-link" href="{{ logout_url }}">Logout <span class="sr-only"></span></a>
       	</li>
       {% else %}
       	<li class="nav-item {% if request.path == login_url %}active{% endif %}">

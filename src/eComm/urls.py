@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
-
 from django.conf.urls import url, include
 from django.contrib import admin
 
@@ -29,13 +28,15 @@ from django.contrib import admin
 #     ProductFeaturedDetailView
 #     )
 
-from .views import home_page, about_page, contact_page, login_page, register_page
+from accounts.views import login_page, register_page, logout_page
+from .views import home_page, about_page, contact_page
 
 urlpatterns = [
     url(r'^$', home_page, name='home'),
     url(r'^about/$', about_page, name='about'),
     url(r'^contact/$', contact_page, name='contact'),
     url(r'^login/$', login_page, name='login'),
+    url(r'^logout/$', logout_page, name='logout'),
     url(r'^carts/', include('carts.urls',namespace = 'carts')),
     url(r'^register/$', register_page, name='register'),
     url(r'^products/', include('products.urls',namespace = 'products')),
