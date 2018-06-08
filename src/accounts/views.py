@@ -1,12 +1,38 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, get_user_model, logout
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, GuestForm
 from django.utils.http import is_safe_url
+
+from .models import GuestEmail
 
 def logout_page(request):
     logout(request)
     return redirect('/login/')
+
+def guest_register_page(request):
+    form = GuestForm(request.POST or None)
+    context = {
+            "form"  : form
+        }
+
+    next_ = request.GET.get('next')
+    next_post = request.POST.get('next')
+    redirect_path = next_ or next_post
+
+    if form.is_valid():
+        email = form.cleaned_data.get("email")
+        new_guest_email = GuestEmail.objects.create(email=email)
+        request.session['guest_email_id'] = new_guest_email.id
+        if is_safe_url(redirect_path, request.get_host()):
+            print("1")
+            return redirect(redirect_path)
+        else:
+            print("2")
+            return redirect("/register/")
+            
+    return redirect("/register/")
+
 
 def login_page(request):
     form = LoginForm(request.POST or None)
@@ -30,6 +56,10 @@ def login_page(request):
         if user is not None:
             print(request.user.is_authenticated())
             login(request, user)
+            try:
+                del request.session['guest_email_id']
+            except:
+                pass
             print(redirect_path)
             if is_safe_url(redirect_path, request.get_host()):
                 return redirect(redirect_path)
