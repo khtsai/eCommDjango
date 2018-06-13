@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from orders.models import Order
 from .models import Cart
 from products.models import Product
+from addresses.forms import AddressForm
+from addresses.models import Address
 from accounts.forms import LoginForm, GuestForm
 from billing.models import BillingProfile
 from accounts.models import GuestEmail
@@ -50,29 +52,36 @@ def checkout_home(request):
     cart_obj, new_cart_obj = Cart.objects.new_or_get(request)
     order_obj = None
     if new_cart_obj:
-        return redirect("cart:home")
+        return redirect("carts:home")
 
-    user = request.user
-    billing_profile = None
     login_form = LoginForm()
     guest_form = GuestForm()
-    guest_email_id = request.session.get('guest_email_id')
-    if user.is_authenticated():
-        billing_profile, billing_profile_created = BillingProfile.objects.get_or_create(user=user, email=user.email)
-    elif guest_email_id is not None:
-        guest_email_obj = GuestEmail.objects.get(id=guest_email_id)
-        billing_profile, billing_profile_created = BillingProfile.objects.get_or_create(email=guest_email_obj.email)
-    else:
-        pass
+    address_form = AddressForm()
+    #billing_address_form = AddressForm()
+    billing_address_id = request.session.get('billing_address_id', None)
+    shipping_address_id = request.session.get('shipping_address_id', None)
+
+    billing_profile, billing_profile_created = BillingProfile.objects.new_or_get(request)
 
     if billing_profile is not None:
-        order_obj = Order.objects.new_or_get(billing_profile,cart_obj)
+        #print(cart_obj) 23
+        order_obj, order_obj_created = Order.objects.new_or_get(billing_profile,cart_obj)
+        if shipping_address_id:
+            order_obj.shipping_address = Address.objects.get(id=shipping_address_id)
+            del request.session['shipping_address_id']
+        if billing_address_id:
+            order_obj.billing_address = Address.objects.get(id=billing_address_id)
+            del request.session['billing_address_id']
+        if billing_address_id or shipping_address_id:
+            order_obj.save()    
 
     context = {
         "object": order_obj,
         "billing_profile": billing_profile,
         "login_form": login_form,
-        "guest_form": guest_form
+        "guest_form": guest_form,
+        "address_form": address_form,
+        #'billing_address_form': billing_address_form
     }
     return render(request, "carts/checkout.html", context)
 

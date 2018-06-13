@@ -3,6 +3,8 @@ from django.db.models.signals import pre_save, post_save
 from .utils import unique_order_id_generator
 from carts.models import Cart
 from billing.models import BillingProfile
+from addresses.models import Address
+
 
 ORDER_STATUS_CHOICES = {
 	('created','Created'),
@@ -16,16 +18,18 @@ class OrderManager(models.Manager):
 		#qs = Order.objects.filter(billing_profile=billing_profile,cart=cart_obj,active=True)
 		qs = self.get_queryset().filter(billing_profile=billing_profile,cart=cart_obj,active=True)
 		created = False
+		obj = None
 		if qs.count() == 1:
 			obj = qs.first()
-			
+			print(obj.shipping_address)
 		else:
 			#obj = Order.objects.create(
-			obj = self.models.objects.create(
+			obj = self.model.objects.create(
 			    billing_profile=billing_profile,
-			    cart=cart_obj
-			    )
+			    cart=cart_obj)
 			created = True
+		print(obj.shipping_address)
+		print(obj.cart)
 		return obj, created
 
 
@@ -33,12 +37,15 @@ class OrderManager(models.Manager):
 class Order(models.Model):
 	order_id = models.CharField(max_length=120, blank=True)
 	billing_profile = models.ForeignKey(BillingProfile, null=True, blank=True)
-	#billing_address = 
+	shipping_address = models.ForeignKey(Address, related_name = 'shipping_address', null = True, blank = True)
+	billing_address = models.ForeignKey(Address, related_name = 'billing_address',null = True, blank = True)
 	cart = models.ForeignKey(Cart)
 	status = models.CharField(max_length=120, default='created', choices = ORDER_STATUS_CHOICES)
 	shipping_total = models.DecimalField(default=0.00, max_digits=100, decimal_places = 2)
 	order_total = models.DecimalField(default=0.00, max_digits=100, decimal_places = 2)
 	active = models.BooleanField(default=True)
+
+	objects = OrderManager()
 
 	def __str__(self):
 		return self.order_id
